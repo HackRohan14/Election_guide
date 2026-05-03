@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 import DigitalTwinProfile from './components/DigitalTwinProfile';
 import ElectionSimulator from './components/ElectionSimulator';
@@ -6,8 +6,13 @@ import KnowYourCandidates from './components/KnowYourCandidates';
 import WhatIfEngine from './components/WhatIfEngine';
 import FlowMap from './components/FlowMap';
 import AIChatAssistant from './components/AIChatAssistant';
+import VoterEducation from './components/VoterEducation';
+import BoothLocator from './components/BoothLocator';
+import { languages } from './utils/translation';
 
 function App() {
+  const [lang, setLang] = useState('en');
+
   // Intersection observer for scroll animations
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -23,12 +28,12 @@ function App() {
   }, []);
 
   const features = [
-    { icon: '👤', title: 'Digital Twin Profile', desc: 'AI-driven wizard analyzes your profile to generate a personalized Election Journey checklist.', href: '#profile', color: 'var(--accent-primary)' },
-    { icon: '🎮', title: 'Election Simulator', desc: 'Navigate real-world voting scenarios in a gamified environment. Learn by doing.', href: '#simulator', color: 'var(--accent-saffron)' },
-    { icon: '🔍', title: 'Know Your Candidates', desc: 'Explore backgrounds, assets, criminal records, and campaign promises of every candidate.', href: '#candidates', color: 'var(--accent-green)' },
-    { icon: '🔮', title: 'What-If Engine', desc: 'Analyze hypothetical situations and get instant legal and practical guidance.', href: '#whatif', color: 'var(--accent-secondary)' },
-    { icon: '🗺️', title: 'Election Flow Map', desc: 'Visual step-by-step journey through the complete Indian election process.', href: '#flowmap', color: 'var(--accent-blue)' },
-    { icon: '🤖', title: 'AI Chat Assistant', desc: 'Context-aware chatbot trained on Indian electoral laws. Ask anything, anytime.', href: '#', color: '#ef4444' },
+    { icon: '👤', title: 'Digital Twin Profile', desc: 'AI-driven wizard for your personalized Election Journey.', href: '#profile', color: 'var(--accent-primary)' },
+    { icon: '🎮', title: 'Election Simulator', desc: 'Navigate real-world voting scenarios in a gamified environment.', href: '#simulator', color: 'var(--accent-saffron)' },
+    { icon: '📍', title: 'Booth Locator', desc: 'Find your nearest polling station using Google Maps.', href: '#locator', color: 'var(--accent-blue)' },
+    { icon: '📺', title: 'Voter Education', desc: 'Official ECI tutorials and awareness videos via YouTube API.', href: '#education', color: '#ef4444' },
+    { icon: '🔍', title: 'Know Your Candidates', desc: 'Explore backgrounds and records of every candidate.', href: '#candidates', color: 'var(--accent-green)' },
+    { icon: '🤖', title: 'Gemini AI Assistant', desc: 'Context-aware chatbot powered by Google Gemini 1.5 Flash.', href: '#', color: 'var(--accent-secondary)' },
   ];
 
   return (
@@ -41,10 +46,21 @@ function App() {
         </div>
         <div className="nav-links">
           <a href="#profile" className="nav-link">Profile</a>
-          <a href="#simulator" className="nav-link">Simulator</a>
+          <a href="#locator" className="nav-link">Maps</a>
+          <a href="#education" className="nav-link">Videos</a>
           <a href="#candidates" className="nav-link">Candidates</a>
-          <a href="#whatif" className="nav-link">What-If</a>
-          <a href="#flowmap" className="nav-link">Flow Map</a>
+          
+          <select 
+            value={lang} 
+            onChange={(e) => setLang(e.target.value)}
+            className="input"
+            style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', width: 'auto', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+          >
+            {languages.map(l => (
+              <option key={l.code} value={l.code} style={{ background: '#0a0e1a' }}>{l.flag} {l.name}</option>
+            ))}
+          </select>
+
           <a href="#profile" className="btn btn-primary" style={{ padding: '0.5rem 1.2rem', textDecoration: 'none', fontSize: '0.85rem' }}>
             Get Started
           </a>
@@ -54,41 +70,41 @@ function App() {
       {/* Hero Section */}
       <header className="hero">
         <div className="hero-badge animate-fade-in">
-          <span aria-hidden="true">🇮🇳</span> India's AI-Powered Election Education Platform
+          <span aria-hidden="true">🇮🇳</span> India's Most Powerful GCP-Integrated Election Platform
         </div>
         <h1 className="hero-title animate-fade-in" style={{ animationDelay: '0.1s' }}>
           Your Vote. Your Voice.<br /><span className="text-gradient">Your Power.</span>
         </h1>
         <p className="hero-subtitle animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          An interactive, gamified platform that transforms complex electoral processes into
-          an engaging and personalized experience for every Indian citizen.
+          An advanced, multi-service platform integrating Google Gemini AI, Maps, YouTube, and Cloud Translation
+           to empower 96.8 Crore Indian voters with real-time intelligence.
         </p>
         <div className="hero-actions animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <a href="#profile" className="btn btn-primary" style={{ textDecoration: 'none', padding: '0.9rem 2rem', fontSize: '1rem' }}>
-            🚀 Start Your Journey
+            🚀 Start AI Journey
           </a>
-          <a href="#flowmap" className="btn btn-secondary" style={{ textDecoration: 'none', padding: '0.9rem 2rem', fontSize: '1rem' }}>
-            🗺️ Explore Flow Map
+          <a href="#locator" className="btn btn-secondary" style={{ textDecoration: 'none', padding: '0.9rem 2rem', fontSize: '1rem' }}>
+            📍 Find Booth
           </a>
         </div>
 
-        {/* Stats */}
+        {/* Cloud Stats */}
         <div className="stats-bar animate-fade-in" style={{ animationDelay: '0.5s', marginTop: '3rem' }}>
           <div className="stat-item">
-            <p className="stat-value text-gradient">96.8 Cr</p>
-            <p className="stat-label">Registered Voters</p>
+            <p className="stat-value text-gradient">Gemini 1.5</p>
+            <p className="stat-label">AI Reasoning</p>
           </div>
           <div className="stat-item">
-            <p className="stat-value" style={{ color: 'var(--accent-saffron)' }}>543</p>
-            <p className="stat-label">Lok Sabha Seats</p>
+            <p className="stat-value" style={{ color: 'var(--accent-blue)' }}>Maps API</p>
+            <p className="stat-label">Geocoding</p>
           </div>
           <div className="stat-item">
-            <p className="stat-value" style={{ color: 'var(--accent-green)' }}>28+8</p>
-            <p className="stat-label">States & UTs</p>
+            <p className="stat-value" style={{ color: 'var(--accent-green)' }}>YouTube v3</p>
+            <p className="stat-label">Official Data</p>
           </div>
           <div className="stat-item">
-            <p className="stat-value" style={{ color: 'var(--accent-secondary)' }}>10.5L</p>
-            <p className="stat-label">Polling Stations</p>
+            <p className="stat-value" style={{ color: 'var(--accent-saffron)' }}>Cloud Translate</p>
+            <p className="stat-label">Multilingual</p>
           </div>
         </div>
       </header>
@@ -96,8 +112,8 @@ function App() {
       {/* Feature Cards */}
       <div className="container">
         <section className="section">
-          <h2 className="section-title scroll-animate">Explore <span className="text-gradient">VoteWise</span></h2>
-          <p className="section-subtitle scroll-animate">Six powerful tools designed to make you an informed, empowered voter</p>
+          <h2 className="section-title scroll-animate">GCP <span className="text-gradient">Cloud Stack</span></h2>
+          <p className="section-subtitle scroll-animate">Leveraging the full power of Google Cloud Platform for Indian Democracy</p>
 
           <div className="features-grid">
             {features.map((f, i) => (
@@ -116,6 +132,8 @@ function App() {
       {/* All Sections */}
       <div className="container">
         <DigitalTwinProfile />
+        <BoothLocator />
+        <VoterEducation />
         <ElectionSimulator />
         <KnowYourCandidates />
         <WhatIfEngine />
@@ -128,10 +146,10 @@ function App() {
       {/* Footer */}
       <footer className="footer">
         <p style={{ marginBottom: '0.5rem' }}>
-          <strong>VoteWise</strong> — An AI-powered election education platform
+          <strong>VoteWise</strong> — Advanced GCP Civic Platform
         </p>
         <p>
-          Data is AI-generated for demonstration purposes.
+          Powered by Gemini 1.5 Flash, Google Maps, and YouTube Data API.
           For official information, visit <a href="https://eci.gov.in" target="_blank" rel="noreferrer">eci.gov.in</a>
         </p>
         <p style={{ marginTop: '1rem', opacity: 0.5 }}>

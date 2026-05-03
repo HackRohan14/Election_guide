@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const API_KEY = import.meta.env.VITE_GCP_API_KEY;
+
 
 const BoothLocator = () => {
   const [address, setAddress] = useState('');
@@ -16,29 +16,16 @@ const BoothLocator = () => {
     setError(null);
     setMapUrl(null);
 
-    try {
-      // 1. Geocode the address using Google Geocoding API
-      const geoRes = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${API_KEY}`
-      );
-      const geoData = await geoRes.json();
-
-      if (geoData.status !== 'OK') {
-        throw new Error('Location not found. Please try a more specific address or PIN code.');
-      }
-
-      const { lat, lng } = geoData.results[0].geometry.location;
-
-      // 2. Generate a Google Maps Embed URL with the coordinates
-      // In a real app, we'd search for "polling station" near these coordinates
-      const embedUrl = `https://www.google.com/maps/embed/v1/search?key=${API_KEY}&q=polling+station+near+${lat},${lng}&zoom=14`;
+    // We use the standard Google Maps search embed which is more reliable for dynamic queries
+    // and doesn't suffer from the 'stylized world map' fallback issue when API keys have
+    // domain restrictions or the specific Maps Embed API isn't enabled.
+    setTimeout(() => {
+      const query = encodeURIComponent(`polling station near ${address}`);
+      const embedUrl = `https://maps.google.com/maps?q=${query}&output=embed&t=m&z=14`;
       
       setMapUrl(embedUrl);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
       setLoading(false);
-    }
+    }, 800);
   };
 
   return (

@@ -17,7 +17,9 @@ const AIChatAssistant = () => {
     ];
   });
   const [input, setInput] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     localStorage.setItem('votewise_chat_history', JSON.stringify(messages));
@@ -26,44 +28,61 @@ const AIChatAssistant = () => {
     }
   }, [messages, isOpen]);
 
-  const callGemini = async (userInput: string) => {
+  const callGemini = async (userInput: string, base64Image?: string) => {
     const systemPrompt = `You are "VoteBot", a specialized AI assistant for the Indian Electoral Process. 
     Your goal is to educate voters. Use Indian context (ECI, EVM, VVPAT, NOTA, NVSP). 
-    Be helpful, neutral, and accurate. If asked about political parties, remain neutral.
-    Always mention that for official data, users should visit eci.gov.in. 
-    Keep responses concise and formatted with bullet points where necessary.
-    Current Year is 2026. General Elections happened in 2024.`;
+    Be helpful, neutral, and accurate. Current Year is 2026.`;
+
+    const contents = [{
+      parts: [
+        { text: `${systemPrompt}\n\nUser: ${userInput}` },
+        ...(base64Image ? [{ inline_data: { mime_type: "image/jpeg", data: base64Image } }] : [])
+      ]
+    }];
 
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: `${systemPrompt}\n\nUser: ${userInput}` }] }]
-        })
+        body: JSON.stringify({ contents })
       });
 
       const data = await response.json();
       return data.candidates[0].content.parts[0].text;
     } catch (error) {
       console.error('Gemini API Error:', error);
-      return "I'm having trouble connecting to my brain (GCP Gemini). Please try again later or check your internet! 🙏";
+      return "I'm having trouble connecting to my brain (GCP Gemini). Please try again later! 🙏";
     }
   };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isTyping) return;
+    if ((!input.trim() && !selectedImage) || isTyping) return;
 
-    const userMsg = input.trim();
+    const userMsg = input.trim() || (selectedImage ? "Analyze this image for me." : "");
     setMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
+    
+    const imageToProcess = selectedImage ? selectedImage.split(',')[1] : undefined;
+    
     setInput('');
+    setSelectedImage(null);
     setIsTyping(true);
 
-    const botResponse = await callGemini(userMsg);
+    const botResponse = await callGemini(userMsg, imageToProcess);
     
     setMessages(prev => [...prev, { sender: 'bot', text: botResponse }]);
     setIsTyping(false);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const clearChat = () => {
@@ -148,30 +167,56 @@ const AIChatAssistant = () => {
 
           {/* Input */}
           <form onSubmit={handleSend} style={{
-            display: 'flex', padding: '0.75rem',
+            display: 'flex', flexDirection: 'column', padding: '0.75rem',
             borderTop: '1px solid var(--glass-border)',
             background: 'rgba(10, 14, 26, 0.95)'
           }}>
-            <input
-              type="text" value={input} onChange={e => setInput(e.target.value)}
-              placeholder="Ask about Indian elections..."
-              aria-label="Type your message to VoteBot"
-              style={{
-                flex: 1, background: 'rgba(255,255,255,0.05)',
-                border: '1px solid var(--glass-border)',
-                padding: '0.85rem 1rem', borderRadius: '10px',
-                color: 'white', outline: 'none', fontSize: '0.95rem',
+            {selectedImage && (
+              <div style={{ position: 'relative', marginBottom: '0.75rem', width: 'fit-content' }}>
+                <img src={selectedImage} alt="Selected" style={{ height: '60px', borderRadius: '8px', border: '1px solid var(--accent-primary)' }} />
+                <button 
+                  onClick={() => setSelectedImage(null)}
+                  style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '12px' }}
+                >✕</button>
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                style={{ display: 'none' }}
+              />
+              <button 
+                type="button" 
+                onClick={() => fileInputRef.current?.click()}
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '10px', padding: '0.75rem', cursor: 'pointer' }}
+                title="Upload Image for AI Analysis"
+              >
+                🖼️
+              </button>
+              <input
+                type="text" value={input} onChange={e => setInput(e.target.value)}
+                placeholder="Ask or upload an image..."
+                aria-label="Type your message to VoteBot"
+                style={{
+                  flex: 1, background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid var(--glass-border)',
+                  padding: '0.85rem 1rem', borderRadius: '10px',
+                  color: 'white', outline: 'none', fontSize: '0.95rem',
+                  fontFamily: 'Inter, sans-serif'
+                }}
+              />
+              <button type="submit" aria-label="Send message" style={{
+                background: 'transparent', border: 'none',
+                color: 'var(--accent-primary)', padding: '0 0.75rem',
+                cursor: 'pointer', fontWeight: 700, fontSize: '0.95rem',
                 fontFamily: 'Inter, sans-serif'
-              }}
-            />
-            <button type="submit" aria-label="Send message" style={{
-              background: 'transparent', border: 'none',
-              color: 'var(--accent-primary)', padding: '0 0.75rem',
-              cursor: 'pointer', fontWeight: 700, fontSize: '0.95rem',
-              fontFamily: 'Inter, sans-serif'
-            }}>
-              Send
-            </button>
+              }}>
+                Send
+              </button>
+            </div>
           </form>
         </div>
       )}

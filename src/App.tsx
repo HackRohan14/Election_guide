@@ -8,6 +8,7 @@ import FlowMap from './components/FlowMap';
 import AIChatAssistant from './components/AIChatAssistant';
 import VoterEducation from './components/VoterEducation';
 import BoothLocator from './components/BoothLocator';
+import MyRepresentatives from './components/MyRepresentatives';
 import { languages } from './utils/translation';
 
 function App() {
@@ -29,7 +30,7 @@ function App() {
 
   const features = [
     { icon: '👤', title: 'Digital Twin Profile', desc: 'AI-driven wizard for your personalized Election Journey.', href: '#profile', color: 'var(--accent-primary)' },
-    { icon: '🎮', title: 'Election Simulator', desc: 'Navigate real-world voting scenarios in a gamified environment.', href: '#simulator', color: 'var(--accent-saffron)' },
+    { icon: '🏛️', title: 'My Representatives', desc: 'Real-time data on your elected officials via Civic API.', href: '#representatives', color: 'var(--accent-saffron)' },
     { icon: '📍', title: 'Booth Locator', desc: 'Find your nearest polling station using Google Maps.', href: '#locator', color: 'var(--accent-blue)' },
     { icon: '📺', title: 'Voter Education', desc: 'Official ECI tutorials and awareness videos via YouTube API.', href: '#education', color: '#ef4444' },
     { icon: '🔍', title: 'Know Your Candidates', desc: 'Explore backgrounds and records of every candidate.', href: '#candidates', color: 'var(--accent-green)' },
@@ -46,9 +47,9 @@ function App() {
         </div>
         <div className="nav-links">
           <a href="#profile" className="nav-link">Profile</a>
+          <a href="#representatives" className="nav-link">Officials</a>
           <a href="#locator" className="nav-link">Maps</a>
           <a href="#education" className="nav-link">Videos</a>
-          <a href="#candidates" className="nav-link">Candidates</a>
           
           <select 
             value={lang} 
@@ -76,15 +77,15 @@ function App() {
           Your Vote. Your Voice.<br /><span className="text-gradient">Your Power.</span>
         </h1>
         <p className="hero-subtitle animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          An advanced, multi-service platform integrating Google Gemini AI, Maps, YouTube, and Cloud Translation
+          An advanced, multi-service platform integrating Google Gemini AI, Maps, YouTube, Civic Data, and Cloud Translation
            to empower 96.8 Crore Indian voters with real-time intelligence.
         </p>
         <div className="hero-actions animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <a href="#profile" className="btn btn-primary" style={{ textDecoration: 'none', padding: '0.9rem 2rem', fontSize: '1rem' }}>
             🚀 Start AI Journey
           </a>
-          <a href="#locator" className="btn btn-secondary" style={{ textDecoration: 'none', padding: '0.9rem 2rem', fontSize: '1rem' }}>
-            📍 Find Booth
+          <a href="#representatives" className="btn btn-secondary" style={{ textDecoration: 'none', padding: '0.9rem 2rem', fontSize: '1rem' }}>
+            🏛️ Find Representatives
           </a>
         </div>
 
@@ -103,8 +104,8 @@ function App() {
             <p className="stat-label">Official Data</p>
           </div>
           <div className="stat-item">
-            <p className="stat-value" style={{ color: 'var(--accent-saffron)' }}>Cloud Translate</p>
-            <p className="stat-label">Multilingual</p>
+            <p className="stat-value" style={{ color: 'var(--accent-saffron)' }}>Civic Info</p>
+            <p className="stat-label">Govt. Data</p>
           </div>
         </div>
       </header>
@@ -132,6 +133,7 @@ function App() {
       {/* All Sections */}
       <div className="container">
         <DigitalTwinProfile />
+        <MyRepresentatives />
         <BoothLocator />
         <VoterEducation />
         <ElectionSimulator />

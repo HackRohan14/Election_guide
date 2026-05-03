@@ -42,13 +42,18 @@ const knowledgeBase: { keywords: string[]; response: string }[] = [
 
 const AIChatAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    { sender: 'bot', text: 'Namaste! 🙏 I\'m VoteBot, your AI assistant for Indian elections. Ask me anything about voter registration, EVMs, NOTA, election laws, or the voting process!' }
-  ]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const saved = localStorage.getItem('votewise_chat_history');
+    return saved ? JSON.parse(saved) : [
+      { sender: 'bot', text: 'Namaste! 🙏 I\'m VoteBot, your AI assistant for Indian elections. Ask me anything about voter registration, EVMs, NOTA, election laws, or the voting process!' }
+    ];
+  });
   const [input, setInput] = useState('');
   const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    localStorage.setItem('votewise_chat_history', JSON.stringify(messages));
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
@@ -56,11 +61,12 @@ const AIChatAssistant = () => {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isTyping) return;
 
     const userMsg = input.trim();
     setMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
     setInput('');
+    setIsTyping(true);
 
     setTimeout(() => {
       const lower = userMsg.toLowerCase();
@@ -81,7 +87,15 @@ const AIChatAssistant = () => {
       }
 
       setMessages(prev => [...prev, { sender: 'bot', text: response }]);
-    }, 700);
+      setIsTyping(false);
+    }, 1000);
+  };
+
+  const clearChat = () => {
+    if (window.confirm('Clear your chat history?')) {
+      setMessages([{ sender: 'bot', text: 'Chat cleared. How can I help you today? 🙏' }]);
+      localStorage.removeItem('votewise_chat_history');
+    }
   };
 
   return (
@@ -109,13 +123,18 @@ const AIChatAssistant = () => {
           boxShadow: '0 25px 50px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)'
         }}>
           {/* Header */}
-          <div style={{ background: 'var(--accent-gradient)', padding: '1.5rem', color: 'white' }}>
-            <h3 style={{ margin: 0, fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span aria-hidden="true">🤖</span> VoteBot Assistant
-            </h3>
-            <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.85, marginTop: '0.2rem' }}>
-              Trained on Indian electoral laws & procedures
-            </p>
+          <div style={{ background: 'var(--accent-gradient)', padding: '1.2rem 1.5rem', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span aria-hidden="true">🤖</span> VoteBot Assistant
+              </h3>
+              <p style={{ margin: 0, fontSize: '0.75rem', opacity: 0.85, marginTop: '0.1rem' }}>
+                AI-powered Election Guide
+              </p>
+            </div>
+            <button onClick={clearChat} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Clear Chat">
+              🗑️
+            </button>
           </div>
 
           {/* Messages */}
@@ -139,6 +158,17 @@ const AIChatAssistant = () => {
                 {msg.text}
               </div>
             ))}
+            {isTyping && (
+              <div style={{
+                alignSelf: 'flex-start', background: 'rgba(255,255,255,0.06)', padding: '0.8rem 1rem',
+                borderRadius: '14px', borderBottomLeftRadius: '2px', border: '1px solid var(--glass-border)',
+                display: 'flex', gap: '4px'
+              }}>
+                <div className="dot-pulse" style={{ width: '6px', height: '6px', background: 'white', borderRadius: '50%', animation: 'pulse 1s infinite' }}></div>
+                <div className="dot-pulse" style={{ width: '6px', height: '6px', background: 'white', borderRadius: '50%', animation: 'pulse 1s infinite 0.2s' }}></div>
+                <div className="dot-pulse" style={{ width: '6px', height: '6px', background: 'white', borderRadius: '50%', animation: 'pulse 1s infinite 0.4s' }}></div>
+              </div>
+            )}
           </div>
 
           {/* Input */}

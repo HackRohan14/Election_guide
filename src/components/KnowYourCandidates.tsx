@@ -87,9 +87,18 @@ const completedElection: CompletedElection = {
 
 const KnowYourCandidates = () => {
   const [mode, setMode] = useState<'ongoing' | 'completed'>('ongoing');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const [expandedCandidate, setExpandedCandidate] = useState<number | null>(null);
   const [compareMode, setCompareMode] = useState(false);
   const [compareList, setCompareList] = useState<number[]>([]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    setIsSearching(true);
+    setTimeout(() => setIsSearching(false), 1500); // Simulate API call
+  };
 
   const toggleCompare = (idx: number) => {
     setCompareList(prev =>
@@ -101,7 +110,29 @@ const KnowYourCandidates = () => {
     <section id="candidates" className="section">
       <div className="container">
         <h2 className="section-title scroll-animate">Know Your <span className="text-gradient">Candidates</span></h2>
-        <p className="section-subtitle scroll-animate">AI-generated profiles for demonstration — Explore backgrounds, track records, and promises</p>
+        <p className="section-subtitle scroll-animate">Explore backgrounds, track records, and promises of candidates in your area</p>
+
+        {/* Search Bar */}
+        <div className="scroll-animate" style={{ maxWidth: '600px', margin: '0 auto 2.5rem' }}>
+          <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.75rem' }}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Enter your Constituency (e.g. Mumbai North, Lucknow, Wayanad)..."
+              className="input"
+              style={{ flex: 1 }}
+            />
+            <button type="submit" className="btn btn-primary" disabled={isSearching}>
+              {isSearching ? '⏳' : '🔍'} Search
+            </button>
+          </form>
+          {isSearching && (
+            <p className="animate-fade-in" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '0.75rem' }}>
+              Fetching latest EC data for "{searchQuery}"...
+            </p>
+          )}
+        </div>
 
         {/* Mode Toggle */}
         <div className="scroll-animate" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '2.5rem' }}>

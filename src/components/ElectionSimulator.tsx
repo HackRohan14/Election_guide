@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Scenario {
   id: number;
@@ -63,6 +63,34 @@ const ElectionSimulator = () => {
   const [gameComplete, setGameComplete] = useState(false);
   const [answeredScenarios, setAnsweredScenarios] = useState(0);
 
+  // Load from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('votewise_sim_state');
+    if (saved) {
+      try {
+        const { current, points, answered, complete } = JSON.parse(saved);
+        setCurrentScenario(current || 0);
+        setTotalPoints(points || 0);
+        setAnsweredScenarios(answered || 0);
+        setGameComplete(complete || false);
+      } catch (e) {
+        console.error('Failed to parse sim state', e);
+      }
+    }
+  }, []);
+
+  // Save to localStorage
+  useEffect(() => {
+    if (answeredScenarios > 0 || gameComplete) {
+      localStorage.setItem('votewise_sim_state', JSON.stringify({
+        current: currentScenario,
+        points: totalPoints,
+        answered: answeredScenarios,
+        complete: gameComplete
+      }));
+    }
+  }, [currentScenario, totalPoints, answeredScenarios, gameComplete]);
+
   const handleChoice = (choiceIdx: number) => {
     if (selectedChoice !== null) return;
     setSelectedChoice(choiceIdx);
@@ -80,11 +108,14 @@ const ElectionSimulator = () => {
   };
 
   const resetGame = () => {
-    setCurrentScenario(0);
-    setSelectedChoice(null);
-    setTotalPoints(0);
-    setGameComplete(false);
-    setAnsweredScenarios(0);
+    if (window.confirm('Reset your simulation progress and score?')) {
+      setCurrentScenario(0);
+      setSelectedChoice(null);
+      setTotalPoints(0);
+      setGameComplete(false);
+      setAnsweredScenarios(0);
+      localStorage.removeItem('votewise_sim_state');
+    }
   };
 
   const maxPoints = scenarios.length * 25;

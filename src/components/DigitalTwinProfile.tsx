@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const steps = [
   { id: 'age', label: 'Your Age Group', options: ['18-25 (First-time voter)', '26-40', '41-60', '60+'] },
@@ -68,6 +68,28 @@ const DigitalTwinProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [checklist, setChecklist] = useState<{ text: string; done: boolean; priority: string }[]>([]);
 
+  // Load from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('votewise_profile_state');
+    if (saved) {
+      try {
+        const { answers: sAnswers, profile: sProfile, checklist: sChecklist } = JSON.parse(saved);
+        setAnswers(sAnswers || {});
+        setProfile(sProfile || null);
+        setChecklist(sChecklist || []);
+      } catch (e) {
+        console.error('Failed to parse saved profile', e);
+      }
+    }
+  }, []);
+
+  // Save to localStorage on change
+  useEffect(() => {
+    if (Object.keys(answers).length > 0 || profile || checklist.length > 0) {
+      localStorage.setItem('votewise_profile_state', JSON.stringify({ answers, profile, checklist }));
+    }
+  }, [answers, profile, checklist]);
+
   const handleSelect = (option: string) => {
     const newAnswers = { ...answers, [steps[currentStep].id]: option };
     setAnswers(newAnswers);
@@ -82,10 +104,13 @@ const DigitalTwinProfile = () => {
   };
 
   const resetProfile = () => {
-    setCurrentStep(0);
-    setAnswers({});
-    setProfile(null);
-    setChecklist([]);
+    if (window.confirm('Are you sure you want to reset your profile and progress?')) {
+      setCurrentStep(0);
+      setAnswers({});
+      setProfile(null);
+      setChecklist([]);
+      localStorage.removeItem('votewise_profile_state');
+    }
   };
 
   const toggleItem = (idx: number) => {
